@@ -7,7 +7,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        cleanupOutdatedCaches: true,
+        skipWaiting: true
+      },
+      includeAssets: ['favicon.ico', 'vite.svg'],
       manifest: {
         name: 'WeatherTunes - Previsão e Música',
         short_name: 'WeatherTunes',
@@ -15,44 +20,34 @@ export default defineConfig({
         theme_color: '#2563EB',
         background_color: '#1e293b',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'portrait-primary',
         scope: '/',
         start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'vite.svg',
             sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
           }
         ]
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.openweathermap\.org\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'weather-api-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
-              },
-              cacheKeyWillBeUsed: async ({ request }) => {
-                return `${request.url}`;
-              }
-            }
-          }
-        ]
+      devOptions: {
+        enabled: false
       }
     })
   ],
-  optimizeDeps: {
-    exclude: ['lucide-react'],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          utils: ['lucide-react']
+        }
+      }
+    }
   },
+  optimizeDeps: {
+    exclude: ['lucide-react']
+  }
 });
