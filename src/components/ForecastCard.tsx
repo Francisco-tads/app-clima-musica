@@ -41,7 +41,10 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({ forecast }) => {
                 {Math.round(day.main.temp)}°
               </div>
               <div className="text-sm text-white/80">
-                {Math.round(day.main.temp_min)}° / {Math.round(day.main.temp_max)}°
+                Mín: {Math.round(day.main.temp_min)}°
+              </div>
+              <div className="text-sm text-white/80">
+                Máx: {Math.round(day.main.temp_max)}°
               </div>
             </div>
           </div>
