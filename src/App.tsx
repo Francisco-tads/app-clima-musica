@@ -12,12 +12,24 @@ import { useGeolocation } from './hooks/useGeolocation';
 import { getWeatherBackgroundImage, isDay } from './utils/weatherUtils';
 import { WeatherData, ForecastData } from './types/weather';
 
+// PWA Install prompt
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
+
 function App() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [favoriteCity, setFavoriteCity] = useLocalStorage<string>('favoriteCity', '');
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   
   const { position, error: geoError, loading: geoLoading } = useGeolocation();
 
@@ -94,6 +106,40 @@ function App() {
     }
   }, [weather, currentWeatherMain, isDayTime, backgroundImage]);
 
+  // PWA Install prompt handling
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setShowInstallPrompt(true);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setShowInstallPrompt(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setShowInstallPrompt(false);
+    }
+  };
+
   return (
     <div 
       className="min-h-screen transition-all duration-1000 bg-cover bg-center bg-no-repeat relative"
@@ -110,6 +156,32 @@ function App() {
       
       <div className="relative min-h-screen">
         <div className="container mx-auto px-4 py-8">
+          {/* PWA Install Banner */}
+          {showInstallPrompt && (
+            <div className="fixed top-4 left-4 right-4 z-50 bg-black/80 backdrop-blur-lg rounded-2xl p-4 text-white border border-white/20">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Instalar WeatherTunes</h3>
+                  <p className="text-sm text-white/80">Adicione à tela inicial para acesso rápido</p>
+                </div>
+                <div className="flex space-x-2 ml-4">
+                  <button
+                    onClick={() => setShowInstallPrompt(false)}
+                    className="px-3 py-1 text-sm bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                  >
+                    Agora não
+                  </button>
+                  <button
+                    onClick={handleInstallClick}
+                    className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    Instalar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-2xl">
               WeatherTunes

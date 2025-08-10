@@ -1,0 +1,52 @@
+{
+  "packageId": "com.weathertunes.twa",
+  "host": {
+    "scheme": "https",
+    "url": "your-domain.com"
+  },
+  "name": "WeatherTunes",
+  "launcherName": "WeatherTunes",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#2563EB",
+  "navigationColor": "#1e293b",
+  "backgroundColor": "#1e293b",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "/icon-512.png",
+  "maskableIconUrl": "/icon-maskable-512.png",
+  "monochromeIconUrl": "/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Buscar Tempo",
+      "shortName": "Buscar",
+      "url": "/?action=search",
+      "iconUrl": "/icon-192.png"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "webManifestUrl": "/manifest.json",
+  "fallbackType": "customtabs"
+}
